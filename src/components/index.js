@@ -49,7 +49,7 @@ function relative(rec1, rec2){
 	return res;
 }
 
-//is rec2 inside rec1
+//is rec2 inside rec1 or not
 function contains(rec1, rec2) {
 	const recF1 = normalize(rec1);
 	const recF2 = normalize(rec2);
