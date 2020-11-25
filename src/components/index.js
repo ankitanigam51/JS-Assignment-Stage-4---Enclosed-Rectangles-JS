@@ -5,76 +5,72 @@
 //	height: '96px'
 //}
 
-function updateStructure(rec1,rec2){
-	//contains(1,2) returns true/false if 2 contained in 1
-	//relative(1,2) returns relative dimensions of 2 w.r.t 1
-	if(contains(rec1, rec2)) {
-		const relativeDim = relative(rec1,rec2);
-		return {...rec1, children: [relativeDim]}
+const { parse } = require("@babel/core");
+
+function updateStructure(recA,recB){
+	if(contains(recA,recB)){
+		const relativeDimension = relative(recA, recB);
+		return {...recA ,children:[relativeDimension]};
 	}
-	else if(contains(rec2, rec1)) {
-		const relativeDim = relative(rec2,rec1);
-		return {...rec2, children: [relativeDim]}
+	else if(contains(recB, recA)){
+		const relativeDimension = relative(recB, recA);
+		return {...recB ,children:[relativeDimension]};
 	}
 	else{
-		return {...rec1}
+		return {...recA};
 	}
 }
-// reletive dim of rec2 w.r.t rec1
-function relative(rec1, rec2){
-	const recF1 = normalize(rec1);
-	const recF2 = normalize(rec2);
+function relative(recA, recB){
+	const recAn = normalize(recA);
+	const recBn = normalize(recB);
 
-	const res = {
-		children: rec2.children
+	const res = { 
+		children : recB.children
 	}
-	if(rec2.top) {
-		res.top = `${recF2.x1 - recF1.x1}px`;
+
+	if(recB.top){
+		res.top = `${recBn.x1  - recAn.x1}px`;
 	}
-	if(rec2.left){
-		res.left = `${recF2.y1 - recF1.y1}px`
+	if(recB.left){
+		res.left = `${recBn.y1  - recAn.y1}px`;
 	}
-	if(rec2.height){
-		res.height = rec2.height;
+	if(recB.height){
+		res.height = recB.height;
 	}
-	if(rec2.width){
-		res.width = rec2.width;
+	if(recB.width){
+		res.width = recB.width;
 	}
-	if(rec2.bottom){
-		res.bottom = `${recF1.x2 - recF2.x2}px`
+	if(recB.bottom){
+		res.bottom = `${recAn.x2  - recBn.x2}px`;
 	}
-	if(rec2.right){
-		res.right = `${recF1.y2 - recF2.y2}px`
+	if(recB.right){
+		res.right = `${recAn.y2  - recBn.y2}px`;
 	}
 	return res;
 }
 
-//is rec2 inside rec1 or not
-function contains(rec1, rec2) {
-	const recF1 = normalize(rec1);
-	const recF2 = normalize(rec2);
+const T = 0;
+const W = 0;
 
-	if(
-		recF1.x1 <= recF2.x1,
-		&& recF1.y1 <= recF2.y1,
-		&& recF1.x2 >= recF2.x2
-		&& recF1.y2 >= recF2.y2
-		){
-			rturn true;
-		}
-		return false;
+function normalize(rec){
+	return {
+		x1 : rec.top ? parseInt(rec.top) : (T - (parseInt(rec.bottom) + parseInt(rec.height))),
+		y1 : rec.left ? parseInt(rec.left) : (W - (parseInt(rec.right) + parseInt(rec.width))), 
+		x2 : rec.bottom ?(T -  parseInt(rec.bottom)) : (parseInt(rec.top) + parseInt(rec.height)),
+		y2 : rec.right ?(W -  parseInt(rec.right)) : (parseInt(rec.left) + parseInt(rec.width))
+	}
 }
 
-const T = 0;//total height
-const W = 0;//total width
-
-function normalize(rec) {
-	return {
-		x1: rec.top ? parseInt(rec.top) : (T - (parseInt(rec.bottom) + parseInt(rec.height))),
-		y1: rec.left ? parseInt(rec.left) : (W -(parseInt(rec.right) + parseInt(rec.width))),
-		x2: rec.bottom ? (T - (parseInt(rec.bottom))) : (parseInt(rec.top) + parseInt(rec.height))
-		y2: rec.right ? (W - (parseInt(rce.right))) : (parseInt(rec.left) + parseInt(rec.width))
+function contains(recA, recB){
+	const recAn = normalize(recA);
+	const recBn = normalize(recB);
+	if(
+		recAn.x1 <= recBn.x1 && recAn.y1 <= recBn.y1 && 
+		recAn.x2 >= recBn.x2 && recAn.y2 >= recBn.y2 
+	){
+		return true;
 	}
+	return false;
 }
 
 module.exports = updateStructure;
